@@ -58,8 +58,8 @@ const rightHendler = () => {
 	if (rightPosition > 5) {
 		rightPosition = 0;
 	}
-	heroImg.style.left = `-${rightPosition * 288}px`;
-	heroImg.style.top = '-576px';
+	heroImg.style.left = `-${rightPosition * 96}px`;
+	heroImg.style.top = '-192px';
 	imgBlock.style.left = `${imgBlockPosition * 20}px`
 }
 
@@ -71,8 +71,8 @@ const leftHendler = () => {
 	if (rightPosition > 5) {
 		rightPosition = 0;
 	}
-	heroImg.style.left = `-${rightPosition * 288}px`;
-	heroImg.style.top = '-576px';
+	heroImg.style.left = `-${rightPosition * 96}px`;
+	heroImg.style.top = '-192px';
 	imgBlock.style.left = `${imgBlockPosition * 20}px`
 }
 
@@ -97,7 +97,7 @@ const standHendler = () => {
 	}
 
 	rightPosition = rightPosition + 1;
-	heroImg.style.left = `-${rightPosition * 288}px`;
+	heroImg.style.left = `-${rightPosition * 96}px`;
 	heroImg.style.top = '0px';
 
 }
@@ -124,8 +124,8 @@ const hitHendler = () => {
 	}
 
 	rightPosition = rightPosition + 1;
-	heroImg.style.left = `-${rightPosition * 288}px`;
-	heroImg.style.top = '-864px';
+	heroImg.style.left = `-${rightPosition * 96}px`;
+	heroImg.style.top = '-288px';
 }
 
 
@@ -151,8 +151,8 @@ const jumpHendler = () => {
 	}
 
 	rightPosition = rightPosition + 1;
-	heroImg.style.left = `-${rightPosition * 288}px`;
-	heroImg.style.top = '-288px';
+	heroImg.style.left = `-${rightPosition * 96}px`;
+	heroImg.style.top = '-96px';
 }
 
 
@@ -200,16 +200,49 @@ const lifeCycle = () => {
 	}, 150)
 }
 
+const createTile = (x, y = 1) => {
+	let tile = window.document.createElement('img');
+	tile.src = 'assets/1 Tiles/Tile_02.png';
+	tile.style.position = 'absolute';
+	tile.style.left = x * 32;
+	tile.style.bottom = y * 32;
+	canvas.appendChild(tile);
+}
 
+const createTilesPlatform = (startX, startY, length) => {
+	for (let i = 0; i < length; i++) {
+		createTile(startX + i, startY);
+	}
+}
 
+const addTiles = (i) => {
+	createTile(i);
+	let tileBlack = window.document.createElement('img');
+	tileBlack.src = 'assets/1 Tiles/Tile_04.png';
+	tileBlack.style.position = 'absolute';
+	tileBlack.style.left = i * 32;
+	tileBlack.style.bottom = 0;
+	canvas.appendChild(tileBlack);
+}
 
 
 
 const start = () => {
 	lifeCycle();
+	for (let i = 0; i < 58; i = i + 1) {
+		addTiles(i);
+
+	}
+	createTilesPlatform(10, 10, 10);
+
+	createTilesPlatform(15, 5, 10);
 }
 
 start();
+//остановился на 10 
+
+
+
 
 
 

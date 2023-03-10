@@ -1,6 +1,14 @@
-<div id="canvas" style="
+<div id="canvas" oncontextmenu="return false" style="
 background-color: white;
 ">
+
+	<div>
+		<img src="assets/2 Background/Day/Background.png" style="
+			position: absolute;
+			left: 0;
+			bottom: 64px;
+			width: 100%;">
+	</div>
 	<img src="fullscreen.png" id="fsBtn" style="
 		width: 40px;
 		height: 40px;
@@ -9,18 +17,19 @@ background-color: white;
 		right: 20px;
 		"></img>
 	<div id="img-block" style="
-		width: 288px;
-		height: 288px;
+		width: 96px;
+		height: 96px;
 		overflow: hidden;
-		position: relative;
+		position: absolute;
 		left: 0px;
+		bottom: 64px;
 		">
 		<img id="hero-img" style="
-		width: 1728px;
-		height: 1152px;
+		width: 576px;
+		height: 384px;
 		position: relative;
 		top: 0px;
-		left: -288px;
+		left: -96px;
 		transform: scale(-1,1);
 		" src="hero-sprite.png">
 	</div>
