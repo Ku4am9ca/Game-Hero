@@ -297,19 +297,55 @@ class Enemy {
 	img;
 	block;
 	blockSize;
+	spritePos;
+	spriteMaxPos;
 	constructor(x, y) {
 		this.posX = x;
 		this.posY = y;
 		this.blockSize = 96;
+		this.spritePos = 0;
+		this.spriteMaxPos = 3;
+		timer;
+
+
+		this.lifeCycle();
+		this.createImg();
+
+
+	}
+	createImg() {
+		this.block = window.document.createElement('div');
+		this.block.style.position = 'absolute';
+		this.block.style.left = this.posX * 32;
+		this.block.style.bottom = this.posY * 32;
+		this.block.style.width = this.blockSize;
+		this.block.style.height = this.blockSize;
+		this.block.style.overflow = 'hidden';
+
 		this.img = window.document.createElement('img');
 		this.img.src = 'assets/Enemies/1/Idle.png';
 		this.img.style.position = 'absolute';
-		this.img.style.left = this.posX * 32;
-		this.img.style.bottom = this.posY * 32;
+		this.img.style.left = 0;
+		this.img.style.bottom = 0;
 		this.img.style.width = this.blockSize * 4;
 		this.img.style.height = this.blockSize;
 
-		canvas.appendChild(this.img);
+
+		this.block.appendChild(this.img);
+		canvas.appendChild(this.block);
+	}
+	lifeCycle() {
+		this.timer = setInterval(() => {
+			this.spritePos++;
+			this.animate();
+		}, 150);
+	}
+
+	animate() {
+		if (this.spritePos > this.spriteMaxPos) {
+			this.spritePos = 0;
+		}
+		this.img.style.left = -(this.spritePos * this.blockSize);
 	}
 }
 
@@ -338,6 +374,8 @@ start();
 
 
 //закончил 4ю38 13 урок
+
+//следующий 14 урок
 
 
 
