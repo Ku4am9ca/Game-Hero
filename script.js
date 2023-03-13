@@ -8,6 +8,16 @@ let imgBlock = window.document.querySelector('#img-block');
 let canvas = window.document.querySelector('#canvas');
 let fsBtn = window.document.querySelector('#fsBtn');
 
+let info = window.document.querySelector('#info');
+
+let heroX = Math.floor((Number.parseInt(imgBlock.style.left) + 32) / 32);
+let heroY = Math.floor((Number.parseInt(imgBlock.style.bottom)) / 32);
+
+//Number.parseInt переводим в число
+
+
+
+
 
 //Переменные
 let rightPosition = 0;
@@ -17,13 +27,14 @@ let halfWidht = window.screen.width / 2;
 let direction = 'right';
 let hit = false;
 let jump = false;
+let tileArray = [];
 
 
 hitBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
 jumpBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
 
 
-
+//обработчики событий
 
 heroImg.onclick = (event) => {
 	event.preventDefault();
@@ -48,7 +59,30 @@ hitBlock.onclick = () => { hit = true; }
 
 //функции
 
+const updateHeroXY = () => {
+	heroX = Math.floor((Number.parseInt(imgBlock.style.left) + 32) / 32);
+	heroY = Math.floor((Number.parseInt(imgBlock.style.bottom)) / 32);
 
+	info.innerText = `heroX=${heroX}, heroY=${heroY}`;
+}
+
+
+const checkFalling = () => {
+	let isFalling = true;
+	for (let i = 0; i < tileArray.length; i++) {
+		if ((tileArray[i][0] === heroX) && ((tileArray[i][1] + 1) === heroY)) {
+			isFalling = false;
+		}
+	}
+
+	if (isFalling) {
+		info.innerText = info.innerText + ', Falling';
+	} else {
+		info.innerText = info.innerText + ',  Not falling';
+	}
+	//tileArray.filter();
+	//функция для работы с массивами
+}
 
 
 const rightHendler = () => {
@@ -60,7 +94,10 @@ const rightHendler = () => {
 	}
 	heroImg.style.left = `-${rightPosition * 96}px`;
 	heroImg.style.top = '-192px';
-	imgBlock.style.left = `${imgBlockPosition * 20}px`
+	imgBlock.style.left = `${imgBlockPosition * 20}px`;
+
+	updateHeroXY();
+	checkFalling();
 }
 
 
@@ -73,7 +110,10 @@ const leftHendler = () => {
 	}
 	heroImg.style.left = `-${rightPosition * 96}px`;
 	heroImg.style.top = '-192px';
-	imgBlock.style.left = `${imgBlockPosition * 20}px`
+	imgBlock.style.left = `${imgBlockPosition * 20}px`;
+
+	updateHeroXY();
+	checkFalling();
 }
 
 
@@ -207,6 +247,9 @@ const createTile = (x, y = 1) => {
 	tile.style.left = x * 32;
 	tile.style.bottom = y * 32;
 	canvas.appendChild(tile);
+
+
+	tileArray.push([x, y]);
 }
 
 const createTilesPlatform = (startX, startY, length) => {
@@ -230,16 +273,22 @@ const addTiles = (i) => {
 const start = () => {
 	lifeCycle();
 	for (let i = 0; i < 58; i = i + 1) {
+		if ((i > 10) && (i < 17)) {
+			continue;
+		}
 		addTiles(i);
 
 	}
 	createTilesPlatform(10, 10, 10);
 
 	createTilesPlatform(15, 5, 10);
+
 }
 
 start();
-//остановился на 10 
+//остановился на 10
+
+//остановился на 11
 
 
 
