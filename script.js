@@ -27,6 +27,7 @@ let halfWidht = window.screen.width / 2;
 let direction = 'right';
 let hit = false;
 let jump = false;
+let fall = false;
 let tileArray = [];
 
 
@@ -60,14 +61,15 @@ hitBlock.onclick = () => { hit = true; }
 //функции
 
 const updateHeroXY = () => {
-	heroX = Math.floor((Number.parseInt(imgBlock.style.left) + 32) / 32);
-	heroY = Math.floor((Number.parseInt(imgBlock.style.bottom)) / 32);
+	heroX = Math.ceil((Number.parseInt(imgBlock.style.left) + 32) / 32);
+	heroY = Math.ceil((Number.parseInt(imgBlock.style.bottom)) / 32);
 
 	info.innerText = `heroX=${heroX}, heroY=${heroY}`;
 }
 
 
 const checkFalling = () => {
+	updateHeroXY();
 	let isFalling = true;
 	for (let i = 0; i < tileArray.length; i++) {
 		if ((tileArray[i][0] === heroX) && ((tileArray[i][1] + 1) === heroY)) {
@@ -77,11 +79,20 @@ const checkFalling = () => {
 
 	if (isFalling) {
 		info.innerText = info.innerText + ', Falling';
+		fall = true;
 	} else {
 		info.innerText = info.innerText + ',  Not falling';
+		fall = false;
 	}
 	//tileArray.filter();
 	//функция для работы с массивами
+}
+
+
+const fallHandler = () => {
+	heroImg.style.top = '-96px'
+	imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) - 40}px`;
+	checkFalling();
 }
 
 
@@ -96,7 +107,7 @@ const rightHendler = () => {
 	heroImg.style.top = '-192px';
 	imgBlock.style.left = `${imgBlockPosition * 20}px`;
 
-	updateHeroXY();
+
 	checkFalling();
 }
 
@@ -112,7 +123,7 @@ const leftHendler = () => {
 	heroImg.style.top = '-192px';
 	imgBlock.style.left = `${imgBlockPosition * 20}px`;
 
-	updateHeroXY();
+
 	checkFalling();
 }
 
@@ -139,6 +150,8 @@ const standHendler = () => {
 	rightPosition = rightPosition + 1;
 	heroImg.style.left = `-${rightPosition * 96}px`;
 	heroImg.style.top = '0px';
+
+	checkFalling();
 
 }
 
@@ -176,6 +189,9 @@ const jumpHendler = () => {
 			if (rightPosition > 4) {
 				rightPosition = 1;
 				jump = false;
+				imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) + 160}px`;
+				imgBlockPosition = imgBlockPosition + 10;
+				imgBlock.style.left = `${imgBlockPosition * 20}px`;
 			}
 			break;
 		}
@@ -183,7 +199,10 @@ const jumpHendler = () => {
 			heroImg.style.transform = 'scale(1,1)';
 			if (rightPosition > 3) {
 				rightPosition = 0;
-				jump = false
+				jump = false;
+				imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) + 160}px`;
+				imgBlockPosition = imgBlockPosition - 10;
+				imgBlock.style.left = `${imgBlockPosition * 20}px`;
 			}
 			break;
 		}
@@ -234,6 +253,8 @@ const lifeCycle = () => {
 			hitHendler();
 		} else if (jump) {
 			jumpHendler();
+		} else if (fall) {
+			fallHandler();
 		} else {
 			standHendler();
 		}
@@ -270,25 +291,53 @@ const addTiles = (i) => {
 
 
 
+class Enemy {
+	posX;
+	posY;
+	img;
+	block;
+	blockSize;
+	constructor(x, y) {
+		this.posX = x;
+		this.posY = y;
+		this.blockSize = 96;
+		this.img = window.document.createElement('img');
+		this.img.src = 'assets/Enemies/1/Idle.png';
+		this.img.style.position = 'absolute';
+		this.img.style.left = this.posX * 32;
+		this.img.style.bottom = this.posY * 32;
+		this.img.style.width = this.blockSize * 4;
+		this.img.style.height = this.blockSize;
+
+		canvas.appendChild(this.img);
+	}
+}
+
+
+
+
+
 const start = () => {
 	lifeCycle();
 	for (let i = 0; i < 58; i = i + 1) {
-		if ((i > 10) && (i < 17)) {
-			continue;
-		}
-		addTiles(i);
+		//	if ((i > 10) && (i < 17)) {
+		//		continue;
 
+		addTiles(i);
 	}
 	createTilesPlatform(10, 10, 10);
-
 	createTilesPlatform(15, 5, 10);
 
+	let enemy = new Enemy(10, 2);
 }
 
 start();
 //остановился на 10
 
 //остановился на 11
+
+
+//закончил 4ю38 13 урок
 
 
 
