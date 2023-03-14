@@ -292,6 +292,17 @@ const addTiles = (i) => {
 
 
 class Enemy {
+
+	ATTACK = 'attak';
+	DEATH = 'death';
+	HURT = 'hurt';
+	IDLE = 'idle';
+	WALK = 'walk';
+
+	state;
+	animateWasChanged;
+
+	startX;//стартовая позиция интелекта противника
 	posX;
 	posY;
 	img;
@@ -299,17 +310,32 @@ class Enemy {
 	blockSize;
 	spritePos;
 	spriteMaxPos;
+	timer;
+	dir;
+	stop;//остановка при столкновении.
+
 	constructor(x, y) {
+
 		this.posX = x;
+		this.startX = this.posX;
 		this.posY = y;
 		this.blockSize = 96;
 		this.spritePos = 0;
 		this.spriteMaxPos = 3;
-		timer;
+		this.sourcePath = 'assets/Enemies/1/';
+		this.state = this.IDLE;
+		this.animateWasChanged = false;
+		this.dir = 1;
+		this.stop = false;
 
 
-		this.lifeCycle();
+
 		this.createImg();
+		this.changeAnimate(this.WALK);
+		this.lifeCycle();
+
+
+
 
 
 	}
@@ -323,11 +349,11 @@ class Enemy {
 		this.block.style.overflow = 'hidden';
 
 		this.img = window.document.createElement('img');
-		this.img.src = 'assets/Enemies/1/Idle.png';
+		this.img.src = this.sourcePath + 'Idle.png';
 		this.img.style.position = 'absolute';
 		this.img.style.left = 0;
 		this.img.style.bottom = 0;
-		this.img.style.width = this.blockSize * 4;
+		this.img.style.width = this.blockSize * 6;
 		this.img.style.height = this.blockSize;
 
 
@@ -336,7 +362,46 @@ class Enemy {
 	}
 	lifeCycle() {
 		this.timer = setInterval(() => {
+
+
+			if (this.animateWasChanged) {
+				this.animateWasChanged = false;
+				switch (this.state) {
+					case this.ATTACK: {
+						this.setAttack();
+						break;
+					}
+					case this.DEATH: {
+						this.setDeath();
+						break;
+					}
+					case this.HURT: {
+						this.setHurt();
+						break;
+					}
+					case this.IDLE: {
+						this.setIdle();
+						break;
+					}
+					case this.WALK: {
+						this.setWalk();
+						break;
+					}
+					default: break;
+
+				}
+			}
+
 			this.spritePos++;
+			this.checkCollide();
+			//если столкновение произошло то выполняется функция move
+
+			if (!this.stop) {
+				this.move();
+			} else {
+				//вызываем функцию атаки при столновенияя
+				this.changeAnimate(this.ATTACK)
+			}
 			this.animate();
 		}, 150);
 	}
@@ -346,6 +411,62 @@ class Enemy {
 			this.spritePos = 0;
 		}
 		this.img.style.left = -(this.spritePos * this.blockSize);
+	}
+	setAttack() {
+		this.img.src = this.sourcePath + 'Attack.png';
+		this.spriteMaxPos = 5;
+	}
+	setDeath() {
+		this.img.src = this.sourcePath + 'Death.png';
+		this.spriteMaxPos = 5;
+	}
+	setHurt() {
+		this.img.src = this.sourcePath + 'Hurt.png';
+		this.spriteMaxPos = 1;
+	}
+	setIdle() {
+		this.img.src = this.sourcePath + 'Idle.png';
+		this.spriteMaxPos = 3;
+	}
+
+	setWalk() {
+		this.img.src = this.sourcePath + 'Walk.png';
+		this.spriteMaxPos = 5;
+	}
+	changeAnimate(stateStr) {
+		this.state = stateStr;
+		this.animateWasChanged = true;
+	}
+	//передвижение противника
+	move() {
+		if (this.posX > (this.startX + 10)) {
+			this.dir = this.dir * -1;
+			this.img.style.transform = "scale(-1,1)";
+		} else if (this.posX <= this.startX) {
+			this.dir = Math.abs(this.dir);
+			this.img.style.transform = "scale(1,1)";
+		}
+		this.posX += this.dir;
+		this.block.style.left = this.posX * 32;
+	}
+
+	// Проверяем на столкновение
+	checkCollide() {
+		if (heroY == this.posY) {
+			if (heroX == this.posX) {
+				//attaks left side
+				this.stop = true;
+			} else if (heroX == (this.posX + 2)) {
+				//	attak right side
+				this.stop = true;
+			} else {
+				this.stop = false;
+				this.changeAnimate(this.WALK);
+			}
+		} else {
+			this.stop = false;
+			this.changeAnimate(this.WALK);
+		}
 	}
 }
 
