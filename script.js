@@ -29,6 +29,8 @@ let hit = false;
 let jump = false;
 let fall = false;
 let tileArray = [];
+let maxLives = 6;
+let lives = 3;
 
 
 hitBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
@@ -470,6 +472,59 @@ class Enemy {
 	}
 }
 
+class Heart {
+	img;
+	x;
+	constructor(x, src) {
+		this.x = x;
+		this.img = window.document.createElement('img');
+		this.img.src = src;
+		this.img.style.position = 'absolute';
+		this.img.style.left = this.x * 32;
+		this.img.style.bottom = ((window.screen.height / 32) - 2) * 32;
+		this.img.style.width = 32;
+		this.img.style.height = 32;
+
+		canvas.appendChild(this.img);
+	}
+}
+
+class HeartEmpty extends Heart {
+	constructor(x) {
+		super(x, 'assets/Hearts/heart_emty.png');
+	}
+}
+
+class HeartRed extends Heart {
+	constructor(x) {
+		super(x, 'assets/Hearts/heart_red.png');
+	}
+}
+
+const addHearts = () => {
+	// let heartEmpty = new HeartEmpty(0);
+	// let heartRed = new HeartRed(1);
+
+	// maxLives = 6
+	// lives = 3
+	lives = 4;
+
+	for (let i = 0; i < lives; i++) {
+		let heartRed = new HeartRed(i);
+	}
+
+	for (let i = (maxLives - lives); (i + maxLives) > 6; i--) {
+		let heartEmpty = new HeartEmpty(maxLives - i);
+	}
+
+	// 1. i = (6 - 3) = 3; (3 + 6 = 9) > 6 (true); i = 2;
+	// 	6 - 3 = 3;
+	// 2. i = 2; (2 + 6 = 8) > 6 (true); i = 1;
+	// 	6 - 2 = 4;
+	// 3. i = 1; (1 + 6 = 7) > 6 (true); i = 0;
+	// 	6 - 1 = 5;
+	// 4. i = 0; (0 + 6 = 6) > 6 (false)
+}
 
 
 
@@ -486,6 +541,8 @@ const start = () => {
 	createTilesPlatform(15, 5, 10);
 
 	let enemy = new Enemy(10, 2);
+
+	addHearts();
 }
 
 start();
@@ -496,7 +553,7 @@ start();
 
 //закончил 4ю38 13 урок
 
-//следующий 14 урок
+//следующий 17 урок
 
 
 
