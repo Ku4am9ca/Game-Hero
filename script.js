@@ -30,7 +30,8 @@ let jump = false;
 let fall = false;
 let tileArray = [];
 let maxLives = 6;
-let lives = 3;
+let lives = 6;
+let heartsArray = [];
 
 
 hitBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
@@ -411,6 +412,10 @@ class Enemy {
 	animate() {
 		if (this.spritePos > this.spriteMaxPos) {
 			this.spritePos = 0;
+			if (this.state === this.ATTACK) {
+				lives--;
+				updateHearts();
+			}
 		}
 		this.img.style.left = -(this.spritePos * this.blockSize);
 	}
@@ -476,7 +481,7 @@ class Heart {
 	img;
 	x;
 	constructor(x, src) {
-		this.x = x;
+		this.x = x + 1;
 		this.img = window.document.createElement('img');
 		this.img.src = src;
 		this.img.style.position = 'absolute';
@@ -507,23 +512,29 @@ const addHearts = () => {
 
 	// maxLives = 6
 	// lives = 3
-	lives = 4;
+	//lives = 6;
 
-	for (let i = 0; i < lives; i++) {
+	for (let i = 0; i < maxLives; i++) {
+		let heartEmpty = new HeartEmpty(i);
 		let heartRed = new HeartRed(i);
+		heartsArray.push(heartRed);
 	}
+}
 
-	for (let i = (maxLives - lives); (i + maxLives) > 6; i--) {
-		let heartEmpty = new HeartEmpty(maxLives - i);
+
+const updateHearts = () => {
+	if (lives < 1) {
+		lives = 1;
 	}
-
-	// 1. i = (6 - 3) = 3; (3 + 6 = 9) > 6 (true); i = 2;
-	// 	6 - 3 = 3;
-	// 2. i = 2; (2 + 6 = 8) > 6 (true); i = 1;
-	// 	6 - 2 = 4;
-	// 3. i = 1; (1 + 6 = 7) > 6 (true); i = 0;
-	// 	6 - 1 = 5;
-	// 4. i = 0; (0 + 6 = 6) > 6 (false)
+	if (lives < 1) {
+		lives = 1;
+	}
+	for (let i = 0; i < lives; i++) {
+		heartsArray[i].img.style.display = 'block';
+	}
+	for (let i = lives; i < maxLives; i++) {
+		heartsArray[i].img.style.display = 'none';
+	}
 }
 
 
@@ -543,6 +554,7 @@ const start = () => {
 	let enemy = new Enemy(10, 2);
 
 	addHearts();
+	updateHearts();
 }
 
 start();
@@ -553,7 +565,7 @@ start();
 
 //закончил 4ю38 13 урок
 
-//следующий 17 урок
+//следующий 19 урок
 
 
 
