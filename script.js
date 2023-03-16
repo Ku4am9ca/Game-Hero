@@ -35,6 +35,10 @@ let maxLives = 6;
 let lives = 6;
 let heartsArray = [];
 
+let isRightSideBlocked = false;//переменные отвечающие за блокировку героя
+let isLefttSideBlocked = false;
+let wasHeoHit = false;
+
 
 hitBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
 jumpBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
@@ -102,34 +106,37 @@ const fallHandler = () => {
 
 
 const rightHendler = () => {
-	heroImg.style.transform = 'scale(-1,1)';
-	rightPosition = rightPosition + 1;
-	imgBlockPosition = imgBlockPosition + 1;
-	if (rightPosition > 5) {
-		rightPosition = 0;
+	if (!isRightSideBlocked) {
+		heroImg.style.transform = 'scale(-1,1)';
+		rightPosition = rightPosition + 1;
+		imgBlockPosition = imgBlockPosition + 1;
+		if (rightPosition > 5) {
+			rightPosition = 0;
+		}
+		heroImg.style.left = `-${rightPosition * 96}px`;
+		heroImg.style.top = '-192px';
+		imgBlock.style.left = `${imgBlockPosition * 20}px`;
+
+
+		checkFalling();
 	}
-	heroImg.style.left = `-${rightPosition * 96}px`;
-	heroImg.style.top = '-192px';
-	imgBlock.style.left = `${imgBlockPosition * 20}px`;
-
-
-	checkFalling();
 }
 
 
 const leftHendler = () => {
-	heroImg.style.transform = 'scale(1,1)';
-	rightPosition = rightPosition + 1;
-	imgBlockPosition = imgBlockPosition - 1;
-	if (rightPosition > 5) {
-		rightPosition = 0;
+	if (!isLefttSideBlocked) {
+		heroImg.style.transform = 'scale(1,1)';
+		rightPosition = rightPosition + 1;
+		imgBlockPosition = imgBlockPosition - 1;
+		if (rightPosition > 5) {
+			rightPosition = 0;
+		}
+		heroImg.style.left = `-${rightPosition * 96}px`;
+		heroImg.style.top = '-192px';
+		imgBlock.style.left = `${imgBlockPosition * 20}px`;
+
+		checkFalling();
 	}
-	heroImg.style.left = `-${rightPosition * 96}px`;
-	heroImg.style.top = '-192px';
-	imgBlock.style.left = `${imgBlockPosition * 20}px`;
-
-
-	checkFalling();
 }
 
 
@@ -167,6 +174,7 @@ const hitHendler = () => {
 			if (rightPosition > 4) {
 				rightPosition = 1;
 				hit = false;
+				wasHeoHit = true;
 			}
 			break;
 		}
@@ -175,6 +183,7 @@ const hitHendler = () => {
 			if (rightPosition > 3) {
 				rightPosition = 0;
 				hit = false
+				wasHeoHit = true;
 			}
 			break;
 		}
@@ -408,6 +417,12 @@ class Enemy {
 					//вызываем функцию атаки при столновенияя
 					this.changeAnimate(this.ATTACK)
 				}
+				//урон наносится только тогда когда онимация атаки героя закончит цыкл
+				if (wasHeoHit) {
+					wasHeoHit = false;//убираем зацикливание логики анимации.
+					this.changeAnimate(this.HURT);
+					this.showHurt();
+				}
 			}
 			this.animate();
 		}, 150);
@@ -469,26 +484,51 @@ class Enemy {
 		if (heroY == this.posY) {
 			if (heroX == this.posX) {
 				//attaks left side
-				if (hit) {
-					this.changeAnimate(this.HURT);
-				}
+
+				isRightSideBlocked = true;
 				this.stop = true;
-			} else if (heroX == (this.posX + 2)) {
+			} else if (heroX == (this.posX + 3)) {
 				//	attak right side
-				if (hit) {
-					this.changeAnimate(this.HURT);
-				}
+
+				isLefttSideBlocked = true;
 				this.stop = true;
 			} else {
+				isRightSideBlocked = false;
+				isLefttSideBlocked = false;
 				this.stop = false;
 				this.changeAnimate(this.WALK);
 			}
 		} else {
+			isRightSideBlocked = false;
+			isLefttSideBlocked = false;
 			this.stop = false;
 			this.changeAnimate(this.WALK);
 		}
 	}
+
+	//показываем урон
+	showHurt() {
+		let pos = 0;
+		let text = window.document.createElement('p');
+		text.innerText = '-10';
+		text.style.position = 'absolute';
+		text.style.left = Number.parseInt(this.block.style.left) + 50;
+		text.style.bottom = Number.parseInt(this.block.style.left) + 32;
+		text.style.fontFamily = "'Black Ops One', cursive";
+		let hartTimer = setInterval(() => {
+			text.style.bottom = Number.parseInt(text.style.bottom) + 16;
+			if (pos > 2) {
+				clearInterval(hartTimer);
+				text.style.display = 'none';
+			}
+			pos++;
+		}, 100);
+		canvas.appendChild(text);
+
+	}
 }
+
+
 
 class Heart {
 	img;
@@ -571,16 +611,7 @@ const start = () => {
 }
 
 start();
-//остановился на 10
 
-//остановился на 11
-
-
-//закончил 4ю38 13 урок
-
-//следующий 19 урок
-
-//запушить!!!!!!! 
 
 
 
