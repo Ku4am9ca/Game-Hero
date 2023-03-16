@@ -10,6 +10,8 @@ let fsBtn = window.document.querySelector('#fsBtn');
 
 let info = window.document.querySelector('#info');
 
+let backgroundCanvas = window.document.querySelector('#backgroundcanvas');
+
 let heroX = Math.floor((Number.parseInt(imgBlock.style.left) + 32) / 32);
 let heroY = Math.floor((Number.parseInt(imgBlock.style.bottom)) / 32);
 
@@ -94,7 +96,7 @@ const checkFalling = () => {
 
 const fallHandler = () => {
 	heroImg.style.top = '-96px'
-	imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) - 40}px`;
+	imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) - 32}px`;
 	checkFalling();
 }
 
@@ -270,7 +272,7 @@ const createTile = (x, y = 1) => {
 	tile.style.position = 'absolute';
 	tile.style.left = x * 32;
 	tile.style.bottom = y * 32;
-	canvas.appendChild(tile);
+	backgroundCanvas.appendChild(tile);
 
 
 	tileArray.push([x, y]);
@@ -289,7 +291,7 @@ const addTiles = (i) => {
 	tileBlack.style.position = 'absolute';
 	tileBlack.style.left = i * 32;
 	tileBlack.style.bottom = 0;
-	canvas.appendChild(tileBlack);
+	backgroundCanvas.appendChild(tileBlack);
 }
 
 
@@ -402,8 +404,10 @@ class Enemy {
 			if (!this.stop) {
 				this.move();
 			} else {
-				//вызываем функцию атаки при столновенияя
-				this.changeAnimate(this.ATTACK)
+				if (this.state != this.HURT) {
+					//вызываем функцию атаки при столновенияя
+					this.changeAnimate(this.ATTACK)
+				}
 			}
 			this.animate();
 		}, 150);
@@ -415,6 +419,9 @@ class Enemy {
 			if (this.state === this.ATTACK) {
 				lives--;
 				updateHearts();
+			}
+			if (this.state === this.HURT) {
+				this.changeAnimate(this.ATTACK);
 			}
 		}
 		this.img.style.left = -(this.spritePos * this.blockSize);
@@ -462,9 +469,15 @@ class Enemy {
 		if (heroY == this.posY) {
 			if (heroX == this.posX) {
 				//attaks left side
+				if (hit) {
+					this.changeAnimate(this.HURT);
+				}
 				this.stop = true;
 			} else if (heroX == (this.posX + 2)) {
 				//	attak right side
+				if (hit) {
+					this.changeAnimate(this.HURT);
+				}
 				this.stop = true;
 			} else {
 				this.stop = false;
