@@ -318,10 +318,18 @@ const createTile = (x, y = 1) => {
 
 	tileArray.push([x, y]);
 }
+//создаем платформы (уровни) на карте
+const createTilesPlatform = (startX, andX, floor) => {
+	for (let x_pos = startX - 1; x_pos < andX; x_pos++) {
+		createTile(x_pos, floor);
+	}
+}
 
-const createTilesPlatform = (startX, startY, length) => {
-	for (let i = 0; i < length; i++) {
-		createTile(startX + i, startY);
+const createTilesBlackBlock = (startX, andX, floor) => {
+	for (let y_pos = 0; y_pos < floor; y_pos++) {
+		for (let x_pos = startX - 1; x_pos < andX; x_pos++) {
+			createTileBlack(x_pos, y_pos);
+		}
 	}
 }
 
@@ -335,8 +343,6 @@ const createTileBlack = (x, y = 0) => {
 	backgroundCanvas.appendChild(tileBlack);
 	objectsArray.push(tileBlack);
 }
-
-
 
 
 
@@ -663,25 +669,61 @@ const updateHearts = () => {
 	}
 }
 
+const createBackImg = (i) => {
+
+	let img = window.document.createElement('img');
+	img.src = 'assets/2 Background/Day/Background.png';
+	img.style.position = 'absolute';
+	img.style.left = i * window.screen.width;
+	img.style.bottom = 32;
+	img.style.width = window.screen.width;
+	backgroundCanvas.appendChild(img);
+	objectsArray.push(img);
+}
+const addbackgroundImages = () => {
+	for (let i = 0; i < 5; i++) {
+		createBackImg(i);
+	}
+}
+
+const buildLevel = () => {
+	let floor1 = 0;
+	let floor2 = 4;
+	let floor3 = 8;
+
+	createTilesPlatform(0, 14, floor1);
+	createTilesPlatform(33, 41, floor1);
+	createTilesPlatform(76, 91, floor1);
+	createTilesPlatform(106, 119, floor1);
+
+	createTilesPlatform(15, 32, floor2);
+	createTilesPlatform(42, 53, floor2);
+	createTilesPlatform(64, 75, floor2);
+	createTilesPlatform(92, 105, floor2);
+
+	createTilesPlatform(8, 20, floor3);
+	createTilesPlatform(54, 63, floor3);
+	createTilesPlatform(75, 87, floor3);
+	createTilesPlatform(99, 111, floor3);
+
+	createTilesBlackBlock(15, 32, floor2)
+	createTilesBlackBlock(42, 53, floor2)
+	createTilesBlackBlock(63, 75, floor2)
+	createTilesBlackBlock(92, 105, floor2)
+
+	createTilesBlackBlock(54, 63, floor3)
+}
 
 
 
 const start = () => {
+	addbackgroundImages();
+	buildLevel();
 	lifeCycle();
-	for (let i = 0; i < 58; i = i + 1) {
-		//	if ((i > 10) && (i < 17)) {
-		//		continue;
-
-		addTiles(i);
-	}
-	createTilesPlatform(10, 10, 10);
-	createTilesPlatform(15, 5, 10);
-
-	let enemy = new Enemy(10, 2);
-
 	addHearts();
 	updateHearts();
 }
+
 
 start();
 
