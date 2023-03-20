@@ -31,13 +31,15 @@ let hit = false;
 let jump = false;
 let fall = false;
 let tileArray = [];
+let objectsArray = [];
+let enemisArray = [];
 let maxLives = 6;
 let lives = 6;
 let heartsArray = [];
 
 let isRightSideBlocked = false;//переменные отвечающие за блокировку героя
 let isLefttSideBlocked = false;
-let wasHeoHit = false;
+let wasHeroHit = false;
 
 
 hitBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
@@ -68,6 +70,30 @@ hitBlock.onclick = () => { hit = true; }
 
 
 //функции
+// передвигаем платформы
+const moveWorldLeft = () => {
+	objectsArray.map((elem, index) => {
+		elem.style.left = Number.parseInt(elem.style.left) - 32;
+	});
+	tileArray.map((elem) => {
+		elem[0] = elem[0] - 1
+	});
+	enemisArray.map(elem => elem.moveLeft());
+}
+
+//передвигаем платформы
+const moveWorldRight = () => {
+	objectsArray.map((elem, index) => {
+		elem.style.left = Number.parseInt(elem.style.left) + 32;
+	});
+	tileArray.map((elem) => {
+		elem[0] = elem[0] + 1
+	});
+	enemisArray.map(elem => elem.moveRight());
+}
+
+
+
 
 const updateHeroXY = () => {
 	heroX = Math.ceil((Number.parseInt(imgBlock.style.left) + 32) / 32);
@@ -119,6 +145,8 @@ const rightHendler = () => {
 
 
 		checkFalling();
+		wasHeroHit = false;
+		moveWorldLeft();
 	}
 }
 
@@ -136,6 +164,9 @@ const leftHendler = () => {
 		imgBlock.style.left = `${imgBlockPosition * 20}px`;
 
 		checkFalling();
+		wasHeroHit = false;
+		moveWorldRight();
+
 	}
 }
 
@@ -282,6 +313,7 @@ const createTile = (x, y = 1) => {
 	tile.style.left = x * 32;
 	tile.style.bottom = y * 32;
 	backgroundCanvas.appendChild(tile);
+	objectsArray.push(tile);
 
 
 	tileArray.push([x, y]);
@@ -293,14 +325,24 @@ const createTilesPlatform = (startX, startY, length) => {
 	}
 }
 
-const addTiles = (i) => {
-	createTile(i);
+
+const createTileBlack = (x, y = 0) => {
 	let tileBlack = window.document.createElement('img');
 	tileBlack.src = 'assets/1 Tiles/Tile_04.png';
 	tileBlack.style.position = 'absolute';
-	tileBlack.style.left = i * 32;
-	tileBlack.style.bottom = 0;
+	tileBlack.style.left = x * 32;
+	tileBlack.style.bottom = y * 32;
 	backgroundCanvas.appendChild(tileBlack);
+	objectsArray.push(tileBlack);
+}
+
+
+
+
+
+const addTiles = (i) => {
+	createTile(i);
+	createTileBlack(i);
 }
 
 
@@ -315,6 +357,7 @@ class Enemy {
 
 	state;
 	animateWasChanged;
+	lives;
 
 	startX;//стартовая позиция интелекта противника
 	posX;
@@ -341,11 +384,13 @@ class Enemy {
 		this.animateWasChanged = false;
 		this.dir = 1;
 		this.stop = false;
+		this.lives = 30;
 
 
 
 		this.createImg();
 		this.changeAnimate(this.WALK);
+		enemisArray.push(this);//передвигаем платформы
 		this.lifeCycle();
 
 
@@ -407,21 +452,15 @@ class Enemy {
 			}
 
 			this.spritePos++;
-			this.checkCollide();
-			//если столкновение произошло то выполняется функция move
 
+			this.checkCollide();
 			if (!this.stop) {
 				this.move();
 			} else {
-				if (this.state != this.HURT) {
-					//вызываем функцию атаки при столновенияя
-					this.changeAnimate(this.ATTACK)
-				}
-				//урон наносится только тогда когда онимация атаки героя закончит цыкл
-				if (wasHeoHit) {
-					wasHeoHit = false;//убираем зацикливание логики анимации.
-					this.changeAnimate(this.HURT);
-					this.showHurt();
+				if (this.state != this.DEATH) {
+					if (this.state != this.HURT) {
+						this.changeAnimate(this.ATTACK);
+					}
 				}
 			}
 			this.animate();
@@ -437,6 +476,17 @@ class Enemy {
 			}
 			if (this.state === this.HURT) {
 				this.changeAnimate(this.ATTACK);
+				if (this.dir > 0) {
+					this.spritePos = 1;
+				}
+			}
+			if (this.state === this.DEATH) {
+				clearInterval(this.timer);
+				isRightSideBlocked = false;
+				isLefttSideBlocked = false;
+				if (this.dir > 0) {
+					this.spritePos = 5;
+				}
 			}
 		}
 		this.img.style.left = -(this.spritePos * this.blockSize);
@@ -469,7 +519,7 @@ class Enemy {
 	//передвижение противника
 	move() {
 		if (this.posX > (this.startX + 10)) {
-			this.dir = this.dir * -1;
+			this.dir = this.dir *= -1;
 			this.img.style.transform = "scale(-1,1)";
 		} else if (this.posX <= this.startX) {
 			this.dir = Math.abs(this.dir);
@@ -478,18 +528,31 @@ class Enemy {
 		this.posX += this.dir;
 		this.block.style.left = this.posX * 32;
 	}
+	checkHurt() {
+		if (wasHeroHit) {
+			if (this.lives <= 10) {
+				wasHeroHit = false;
+				this.changeAnimate(this.DEATH);
+			} else {
+				wasHeroHit = false;//убираем зацикливание логики анимации.
+				this.changeAnimate(this.HURT);
+				this.showHurt();
+				this.lives -= 10;
+			}
 
+		}
+	}
 	// Проверяем на столкновение
 	checkCollide() {
 		if (heroY == this.posY) {
 			if (heroX == this.posX) {
 				//attaks left side
-
+				this.checkHurt();
 				isRightSideBlocked = true;
 				this.stop = true;
 			} else if (heroX == (this.posX + 3)) {
 				//	attak right side
-
+				this.checkHurt();
 				isLefttSideBlocked = true;
 				this.stop = true;
 			} else {
@@ -512,7 +575,7 @@ class Enemy {
 		let text = window.document.createElement('p');
 		text.innerText = '-10';
 		text.style.position = 'absolute';
-		text.style.left = Number.parseInt(this.block.style.left) + 50;
+		text.style.left = (this.dir < 0) ? Number.parseInt(this.block.style.left) + 50 : Number.parseInt(this.block.style.left) + 10;
 		text.style.bottom = Number.parseInt(this.block.style.left) + 32;
 		text.style.fontFamily = "'Black Ops One', cursive";
 		let hartTimer = setInterval(() => {
@@ -525,6 +588,16 @@ class Enemy {
 		}, 100);
 		canvas.appendChild(text);
 
+	}
+	//передвигаем врага 
+	moveRight() {
+		this.startX += 1;
+		this.posX += 1;
+	}
+
+	moveLeft() {
+		this.startX -= 1;
+		this.posX -= 1;
 	}
 }
 
