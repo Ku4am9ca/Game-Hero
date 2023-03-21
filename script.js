@@ -40,6 +40,12 @@ let heartsArray = [];
 let isRightSideBlocked = false;//переменные отвечающие за блокировку героя
 let isLefttSideBlocked = false;
 let wasHeroHit = false;
+let f1WallArray = [[-10, 0][14, 32], [42, 53], [64, 74], [92, 105][119, 129]];
+let f2WallArray = [[54, 63]];
+let isWallRith = false;
+let isWallLeft = false;
+let heroStep = 3;// hero's movement speed
+
 
 
 hitBlock.style.top = `${window.screen.height / 2 - 144 / 2}px`
@@ -79,6 +85,14 @@ const moveWorldLeft = () => {
 		elem[0] = elem[0] - 1
 	});
 	enemisArray.map(elem => elem.moveLeft());
+	f1WallArray.map(elem => {
+		elem[0] -= 1;
+		elem[1] -= 1;
+	})
+	f2WallArray.map(elem => {
+		elem[0] -= 1;
+		elem[1] -= 1;
+	})
 }
 
 //передвигаем платформы
@@ -90,6 +104,14 @@ const moveWorldRight = () => {
 		elem[0] = elem[0] + 1
 	});
 	enemisArray.map(elem => elem.moveRight());
+	f1WallArray.map(elem => {
+		elem[0] += 1;
+		elem[1] += 1;
+	})
+	f2WallArray.map(elem => {
+		elem[0] += 1;
+		elem[1] += 1;
+	})
 }
 
 
@@ -129,10 +151,45 @@ const fallHandler = () => {
 	imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) - 32}px`;
 	checkFalling();
 }
-
+// проверка на столкновение с платформой
+const checkRightWallCollide = () => {
+	isWallLeft = false;
+	isWallRith = false;
+	if (heroY === 1) {
+		f1WallArray.map(elem => {
+			if (heroX === elem[0] - 2) {
+				isWallRith = true;
+			}
+		})
+	} else if (heroY === 5) {
+		f2WallArray.map(elem => {
+			if (heroX === elem[0] - 2) {
+				isWallRith = true;
+			}
+		})
+	}
+}
+// проверка на столкновение с платформой
+const checkLeftWallCollide = () => {
+	isWallLeft = false;
+	isWallRith = false;
+	if (heroY === 1) {
+		f1WallArray.map(elem => {
+			if (heroX === elem[1]) {
+				isWallLeft = true;
+			}
+		})
+	} else if (heroY === 5) {
+		f2WallArray.map(elem => {
+			if (heroX === elem[1]) {
+				isWallLeft = true;
+			}
+		})
+	}
+}
 
 const rightHendler = () => {
-	if (!isRightSideBlocked) {
+	if (!isRightSideBlocked && !isWallRith) {
 		heroImg.style.transform = 'scale(-1,1)';
 		rightPosition = rightPosition + 1;
 		imgBlockPosition = imgBlockPosition + 1;
@@ -141,18 +198,19 @@ const rightHendler = () => {
 		}
 		heroImg.style.left = `-${rightPosition * 96}px`;
 		heroImg.style.top = '-192px';
-		imgBlock.style.left = `${imgBlockPosition * 20}px`;
+		imgBlock.style.left = `${imgBlockPosition * heroStep}px`;
 
 
 		checkFalling();
 		wasHeroHit = false;
 		moveWorldLeft();
+		checkRightWallCollide();
 	}
 }
 
 
 const leftHendler = () => {
-	if (!isLefttSideBlocked) {
+	if (!isLefttSideBlocked && !isWallLeft) {
 		heroImg.style.transform = 'scale(1,1)';
 		rightPosition = rightPosition + 1;
 		imgBlockPosition = imgBlockPosition - 1;
@@ -161,11 +219,12 @@ const leftHendler = () => {
 		}
 		heroImg.style.left = `-${rightPosition * 96}px`;
 		heroImg.style.top = '-192px';
-		imgBlock.style.left = `${imgBlockPosition * 20}px`;
+		imgBlock.style.left = `${imgBlockPosition * heroStep}px`;
 
 		checkFalling();
 		wasHeroHit = false;
 		moveWorldRight();
+		checkLeftWallCollide();
 
 	}
 }
@@ -228,6 +287,8 @@ const hitHendler = () => {
 
 
 const jumpHendler = () => {
+	isWallRith = false;// обнуляем значения для предотвращения стопа передвежения после прыжка
+	isWallLeft = false;
 	switch (direction) {
 		case 'right': {
 			heroImg.style.transform = 'scale(-1,1)';
@@ -235,8 +296,8 @@ const jumpHendler = () => {
 				rightPosition = 1;
 				jump = false;
 				imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) + 160}px`;
-				imgBlockPosition = imgBlockPosition + 10;
-				imgBlock.style.left = `${imgBlockPosition * 20}px`;
+				imgBlockPosition = imgBlockPosition + 15;
+				imgBlock.style.left = `${imgBlockPosition * heroStep}px`;
 			}
 			break;
 		}
@@ -246,8 +307,8 @@ const jumpHendler = () => {
 				rightPosition = 0;
 				jump = false;
 				imgBlock.style.bottom = `${Number.parseInt(imgBlock.style.bottom) + 160}px`;
-				imgBlockPosition = imgBlockPosition - 10;
-				imgBlock.style.left = `${imgBlockPosition * 20}px`;
+				imgBlockPosition = imgBlockPosition - 15;
+				imgBlock.style.left = `${imgBlockPosition * heroStep}px`;
 			}
 			break;
 		}
@@ -334,6 +395,7 @@ const createTilesBlackBlock = (startX, andX, floor) => {
 }
 
 
+
 const createTileBlack = (x, y = 0) => {
 	let tileBlack = window.document.createElement('img');
 	tileBlack.src = 'assets/1 Tiles/Tile_04.png';
@@ -352,7 +414,7 @@ const addTiles = (i) => {
 }
 
 
-
+//классы
 class Enemy {
 
 	ATTACK = 'attak';
@@ -377,15 +439,15 @@ class Enemy {
 	dir;
 	stop;//остановка при столкновении.
 
-	constructor(x, y) {
+	constructor(x, y, src) {
 
 		this.posX = x;
-		this.startX = this.posX;
+		this.startX = x + this.getRandomOffset(6);
 		this.posY = y;
 		this.blockSize = 96;
 		this.spritePos = 0;
 		this.spriteMaxPos = 3;
-		this.sourcePath = 'assets/Enemies/1/';
+		this.sourcePath = src;
 		this.state = this.IDLE;
 		this.animateWasChanged = false;
 		this.dir = 1;
@@ -425,7 +487,7 @@ class Enemy {
 		this.block.appendChild(this.img);
 		canvas.appendChild(this.block);
 	}
-	lifeCycle() {
+	lifeCycle(attak, death, walk) {
 		this.timer = setInterval(() => {
 
 
@@ -433,22 +495,28 @@ class Enemy {
 				this.animateWasChanged = false;
 				switch (this.state) {
 					case this.ATTACK: {
+
 						this.setAttack();
 						break;
 					}
-					case this.DEATH: {
-						this.setDeath();
-						break;
-					}
 					case this.HURT: {
+
 						this.setHurt();
 						break;
 					}
+					case this.DEATH: {
+
+						this.setDeath();
+						break;
+					}
+
 					case this.IDLE: {
+
 						this.setIdle();
 						break;
 					}
 					case this.WALK: {
+
 						this.setWalk();
 						break;
 					}
@@ -470,7 +538,7 @@ class Enemy {
 				}
 			}
 			this.animate();
-		}, 150);
+		}, 1500);
 	}
 
 	animate() {
@@ -524,7 +592,7 @@ class Enemy {
 	}
 	//передвижение противника
 	move() {
-		if (this.posX > (this.startX + 10)) {
+		if (this.posX > (this.startX + 6)) {
 			this.dir = this.dir *= -1;
 			this.img.style.transform = "scale(-1,1)";
 		} else if (this.posX <= this.startX) {
@@ -599,13 +667,82 @@ class Enemy {
 	moveRight() {
 		this.startX += 1;
 		this.posX += 1;
+		if (this.stop || this.state == this.DEATH) {
+			this.block.style.left = Number.parseInt(this.block.style.left) + 32;
+		}
 	}
 
 	moveLeft() {
 		this.startX -= 1;
 		this.posX -= 1;
+		if (this.stop || this.state == this.DEATH) {
+			this.block.style.left = Number.parseInt(this.block.style.left) - 32;
+		}
+	}
+	getRandomOffset(max) {
+		let rand = Math.floor(Math.random() * max);
+		return rand;
 	}
 }
+
+class Enemy1 extends Enemy {
+	constructor(x, y) {
+		super(x, y, 'assets/Enemies/1/');
+	}
+
+}
+class Enemy2 extends Enemy {
+	constructor(x, y) {
+		super(x, y, 'assets/Enemies/2/');
+	}
+	setAttack() {
+		this.img.src = this.sourcePath + 'Attack.png';
+		this.spriteMaxPos = 5;
+	}
+	setDeath() {
+		this.img.src = this.sourcePath + 'Death.png';
+		this.spriteMaxPos = 5;
+	}
+	setWalk() {
+		this.img.src = this.sourcePath + 'Walk.png';
+		this.spriteMaxPos = 3;
+	}
+}
+class Enemy5 extends Enemy {
+	constructor(x, y) {
+		super(x, y, 'assets/Enemies/5/');
+	}
+	setAttack() {
+		this.img.src = this.sourcePath + 'Attack.png';
+		this.spriteMaxPos = 3;
+	}
+	setDeath() {
+		this.img.src = this.sourcePath + 'Death.png';
+		this.spriteMaxPos = 2;
+	}
+	setWalk() {
+		this.img.src = this.sourcePath + 'Walk.png';
+		this.spriteMaxPos = 3;
+	}
+}
+class Enemy6 extends Enemy {
+	constructor(x, y) {
+		super(x, y, 'assets/Enemies/6/');
+	}
+	setAttack() {
+		this.img.src = this.sourcePath + 'Attack.png';
+		this.spriteMaxPos = 3;
+	}
+	setDeath() {
+		this.img.src = this.sourcePath + 'Death.png';
+		this.spriteMaxPos = 2;
+	}
+	setWalk() {
+		this.img.src = this.sourcePath + 'Walk.png';
+		this.spriteMaxPos = 3;
+	}
+}
+
 
 
 
@@ -674,7 +811,7 @@ const createBackImg = (i) => {
 	let img = window.document.createElement('img');
 	img.src = 'assets/2 Background/Day/Background.png';
 	img.style.position = 'absolute';
-	img.style.left = i * window.screen.width;
+	img.style.left = (i * window.screen.width) - 32;
 	img.style.bottom = 32;
 	img.style.width = window.screen.width;
 	backgroundCanvas.appendChild(img);
@@ -744,7 +881,15 @@ const addDecorationElements = (f1, f2, f3) => {
 	createImgEl('assets/3 Objects/Other/Tree1.png', 10, f1);
 }
 
-
+const addEnemies = () => {
+	let enemy1 = new Enemy1(9, 9);
+	let enemy2 = new Enemy6(19, 5);
+	let enemy3 = new Enemy5(44, 5);
+	let enemy4 = new Enemy2(65, 5);
+	let enemy5 = new Enemy1(79, 1);
+	let enemy6 = new Enemy6(93, 5);
+	let enemy7 = new Enemy2(100, 9);
+}
 
 const buildLevel = () => {
 	let floor1 = 0;
@@ -757,7 +902,7 @@ const buildLevel = () => {
 	createTilesPlatform(0, 14, floor1);
 	createTilesPlatform(33, 41, floor1);
 	createTilesPlatform(76, 91, floor1);
-	createTilesPlatform(106, 119, floor1);
+	createTilesPlatform(106, 132, floor1);
 
 	createTilesPlatform(15, 32, floor2);
 	createTilesPlatform(42, 53, floor2);
@@ -775,9 +920,12 @@ const buildLevel = () => {
 	createTilesBlackBlock(92, 105, floor2)
 
 	createTilesBlackBlock(54, 63, floor3)
+
+
+	addEnemies();
 }
 
-
+addEnemies();
 
 const start = () => {
 	addbackgroundImages();
@@ -785,6 +933,7 @@ const start = () => {
 	lifeCycle();
 	addHearts();
 	updateHearts();
+	let Enemy10 = new Enemy2(5, 1);
 }
 
 
