@@ -415,6 +415,87 @@ const addTiles = (i) => {
 
 
 //классы
+
+class Cutscene {
+	text;
+	block;
+	p;
+	nextButton;
+	skipButton;
+	constructor(text) {
+		this.text = text;
+		this.block = window.document.createElement('div');
+		this.block.style.position = 'absolute';
+		this.block.style.left = '10%';
+		this.block.style.bottom = '10vh';
+		this.block.style.width = '80%';
+		this.block.style.height = '80vh';
+		//#38002c
+		//#8babbf
+		this.block.style.background = '#38002c';
+		this.block.style.border = '5px solid #8babbf';
+		this.appendP();//метод добавляем параграы;
+		this.appendNextButton();//метод добавляем кнопку;
+		this.appendSkipButton();//метод добавляем кнопку;
+		this.setText(this.text);
+		canvas.appendChild(this.block);
+	}
+	appendP() {
+		this.p = window.document.createElement('p');
+		this.p.style.position = 'absolute';
+		this.p.style.left = '10%';
+		this.p.style.top = '4vh';
+		this.p.style.tip = '80%';
+		this.p.style.fontSize = '8pt';
+		this.p.style.lineHeight = '1,5';
+		this.p.style.color = '#8babbf'
+		this.p.style.fontFamily = "'Black Ops One', cursive";
+		this.block.appendChild(this.p);
+	}
+	appendNextButton() {
+		this.nextButton = window.document.createElement('button');
+		//помещаем кнопку
+		this.setButtonStyle(this.nextButton, 'Next');
+		//позиция кнопки по правому краю
+		this.nextButton.style.right = 0;
+		this.nextButton.onclick = () => {
+			this.setText('Next');
+		}
+		this.block.appendChild(this.nextButton);
+
+	}
+	appendSkipButton() {
+		this.skipButton = window.document.createElement('button');
+		//помещаем кнопку
+		this.setButtonStyle(this.skipButton, 'Skip');
+		this.skipButton.style.left = 0;
+		this.skipButton.onclick = () => {
+			this.setText('Skip');
+		}
+		this.block.appendChild(this.skipButton);
+	}
+	//прокидываем элемент button
+	setButtonStyle(button, title) {
+		//ставим общие стили
+		button.style.position = 'absolute';
+		button.style.bottom = 0;
+		button.style.backgroundColor = '#8babbf';
+		button.style.color = '#38002c';
+		button.innerText = title;
+		button.style.fontSize = '20pt';
+		button.style.margin = '10pt';
+		button.style.padding = '10pt';
+		button.style.border = 'none';
+		button.style.fontFamily = "'Black Ops One', cursive";
+	}
+
+	setText(text) {
+		this.p.innerText = text;
+	}
+}
+
+
+
 class Enemy {
 
 	ATTACK = 'attak';
@@ -1060,7 +1141,8 @@ const start = () => {
 	lifeCycle();
 	addHearts();
 	updateHearts();
-	let Enemy10 = new Enemy2(5, 1);
+	let cutscene = new Cutscene('Hello world');
+	//let Enemy10 = new Enemy2(5, 1);
 }
 
 
