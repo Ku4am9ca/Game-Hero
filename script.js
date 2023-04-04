@@ -422,7 +422,10 @@ class Cutscene {
 	p;
 	nextButton;
 	skipButton;
+	page;
+	timer;
 	constructor(text) {
+		this.page = 0;
 		this.text = text;
 		this.block = window.document.createElement('div');
 		this.block.style.position = 'absolute';
@@ -437,7 +440,7 @@ class Cutscene {
 		this.appendP();//метод добавляем параграы;
 		this.appendNextButton();//метод добавляем кнопку;
 		this.appendSkipButton();//метод добавляем кнопку;
-		this.setText(this.text);
+		this.setText(this.text[this.page]);
 		canvas.appendChild(this.block);
 	}
 	appendP() {
@@ -446,10 +449,15 @@ class Cutscene {
 		this.p.style.left = '10%';
 		this.p.style.top = '4vh';
 		this.p.style.tip = '80%';
-		this.p.style.fontSize = '8pt';
+		this.p.style.fontSize = '20pt';
 		this.p.style.lineHeight = '1,5';
 		this.p.style.color = '#8babbf'
 		this.p.style.fontFamily = "'Black Ops One', cursive";
+		this.p.onclick = () => {
+			this.nextButton.style.display = 'block';
+			clearInterval(this.timer);
+			this.p.innerText = this.text[this.page];
+		}
 		this.block.appendChild(this.p);
 	}
 	appendNextButton() {
@@ -458,8 +466,16 @@ class Cutscene {
 		this.setButtonStyle(this.nextButton, 'Next');
 		//позиция кнопки по правому краю
 		this.nextButton.style.right = 0;
+		this.nextButton.style.display = 'none';
 		this.nextButton.onclick = () => {
-			this.setText('Next');
+			if (this.page < this.text.length - 1) {
+				this.page++;
+				this.setText(this.text[this.page]);
+				this.nextButton.style.display = 'none';
+			} else {
+				this.block.style.display = 'none';
+			}
+
 		}
 		this.block.appendChild(this.nextButton);
 
@@ -470,7 +486,7 @@ class Cutscene {
 		this.setButtonStyle(this.skipButton, 'Skip');
 		this.skipButton.style.left = 0;
 		this.skipButton.onclick = () => {
-			this.setText('Skip');
+			this.block.style.display = 'none';
 		}
 		this.block.appendChild(this.skipButton);
 	}
@@ -490,7 +506,22 @@ class Cutscene {
 	}
 
 	setText(text) {
-		this.p.innerText = text;
+		if (this.page === this.text.length - 1) this.nextButton.innerText = 'Go';
+		let innerText = '';
+		let targetText = text;
+		let pos = 0;
+		// показываем текст с задержкой
+		this.timer = setInterval(() => {
+			if (pos <= targetText.length - 1) {
+				innerText += targetText[pos];
+				this.p.innerText = innerText;
+				pos++;
+			} else {
+				clearInterval(this.timer);
+				this.nextButton.style.display = 'block';
+			}
+		}, 40);
+		//this.p.innerText = text;
 	}
 }
 
@@ -1141,17 +1172,16 @@ const start = () => {
 	lifeCycle();
 	addHearts();
 	updateHearts();
-	let cutscene = new Cutscene('Hello world');
-	//let Enemy10 = new Enemy2(5, 1);
+
+
+	let cutscene = new Cutscene([
+		'После неудачной попытки выследить похитетелей своей девушки, Адам был пойман недображелателями.\n\nОни решили протестировать на герое недавно украденную сверхсекретную разработку. В результате - сознание Адама было заключено в виртуальный плен.\n\nВсе это время друзья героя искали его и спустя несколько дней, наконец-то смогли выйти с ним на связь.',
+		'Оказалось, что из виртуального мира можно сбежать - дверь находиться за одним из фонтанов в конце первого уровня. Но, чтобы ее открыть нужно найти спрятанный рычаг и ввести код пароля. \n\nПароль состоит из 4 чисел. Цифры пароля находятся внутри тщательно охраняемых деревянных ящиков (по одной в каждом).\n\nЧто касается рычага - он спрятан на втором уровне, куда у Адама нет доступа.',
+		'К счастью друзья нашли способ похитить его. Но, поскольку опасность слышком велика, они передадут рычаг, только когда станут известны все цифры пароля.\n\nКогда появится рычаг у Адама будет 15 секунд чтобы найти его, подбежать к фонтану и ввести пароль. Если герой не успеет - местонохождение его друзей будет обнаружено недоброжелателями.',
+	]);
+
+
+
 }
 
-
 start();
-
-
-
-
-
-
-
-
